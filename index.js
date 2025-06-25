@@ -4,7 +4,7 @@ let boardState = [
   ["bR", "bN", "bB", "bQ", "bK", "bB", "bN", "bR"],
   ["bP", "bP", "bP", "bP", "bP", "bP", "bP", "bP"],
   [null, null, null, null, null, null, null, null],
-  [null, null, null, null, null, null, "wQ", null],
+  [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   [null, null, null, null, null, null, null, null],
   ["wP", "wP", "wP", "wP", "wP", "wP", "wP", "wP"],
@@ -360,6 +360,9 @@ chessBoardUI.addEventListener("click", (e) => {
         const opponentColor = currentTurn == "w" ? "b" : "w";
 
         currentTurn = opponentColor;
+        document.querySelector(".current-turn").textContent = `Current Turn: ${
+          currentTurn == "w" ? "White" : "Black"
+        }`;
         // Reset everything.
         selectedPiece = null;
         legalMoves = [];

@@ -1,1 +1,3 @@
 # JS-Chess-Game
+
+Please not that I used AI a lot ...

@@ -75,8 +75,11 @@ body {
 .legal-move {
   /* background-color: lightskyblue; */
   /* background: radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%); */
-  /* background-image: radial-gradient(lightskyblue 19%, rgba(0, 0, 0, 0) 20%); */
-  box-shadow: inset 1px 1px 5px 10px lightskyblue;
+  background-image: radial-gradient(
+    rgba(20, 85, 30, 0.5) 50%,
+    rgba(0, 0, 0, 0) 10%
+  );
+  /* box-shadow: inset 1px 1px 5px 10px lightskyblue; */
   cursor: pointer;
 }
 .in-check {

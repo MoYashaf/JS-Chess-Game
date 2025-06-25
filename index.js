@@ -67,11 +67,11 @@ function highlightSquares(squares) {
     squaresToBeHighlighted[i].classList.add("legal-move");
   }
 }
-function clearHighlights() {
+function clearHighlights(type = "all") {
   const squares = document.querySelectorAll(".chess-board .square");
   squares.forEach((square, index) => {
     square.classList.remove("legal-move");
-    square.classList.remove("in-check");
+    if (type == "all") square.classList.remove("in-check");
   });
 }
 function isValidSquare(r, c) {
@@ -312,11 +312,22 @@ function checkForChecks(boardState, kingColor) {
     return move[0] == kingPosition[0] && move[1] == kingPosition[1];
   });
 }
-function highlightCheck(row, col, boardState) {
-  let checkedSquare = document.querySelector(
-    `.square[data-row="${row}"][data-col="${col}"]`
-  );
-  checkedSquare.classList.add("in-check");
+function highlightCheck(boardState, kingColor) {
+  for (let i = 0; i < BOARD_DIM; i++) {
+    for (let j = 0; j < BOARD_DIM; j++) {
+      if (boardState[i][j]) {
+        if (
+          getPieceType(i, j, boardState) == "K" &&
+          boardState[i][j][0] == kingColor
+        ) {
+          let checkedSquare = document.querySelector(
+            `.square[data-row="${i}"][data-col="${j}"]`
+          );
+          checkedSquare.classList.add("in-check");
+        }
+      }
+    }
+  }
 }
 let selectedPiece = null;
 let legalMoves = [];
@@ -330,6 +341,7 @@ chessBoardUI.addEventListener("click", (e) => {
   let clickedPiece = boardState[row][col];
   let clickedPieceColor = clickedPiece ? clickedPiece[0] : null;
 
+  // Means the player already selected a piece, only need to move it now.
   if (selectedPiece) {
     const isLegalMove = legalMoves.some(
       (move) => move[0] == row && move[1] == col
@@ -342,33 +354,33 @@ chessBoardUI.addEventListener("click", (e) => {
       tempBoardState[selectedPiece.row][selectedPiece.col] = null;
       const leavesKingInCheck = checkForChecks(tempBoardState, currentTurn);
       if (!leavesKingInCheck) {
+        // Perform the real move.
         boardState[row][col] = boardState[selectedPiece.row][selectedPiece.col];
         boardState[selectedPiece.row][selectedPiece.col] = null;
         const opponentColor = currentTurn == "w" ? "b" : "w";
 
-        if (checkForChecks(boardState, opponentColor)) {
-          console.log("Someone is in check!");
-        }
         currentTurn = opponentColor;
         // Reset everything.
         selectedPiece = null;
         legalMoves = [];
-        clearHighlights();
+        if (checkForChecks(boardState, opponentColor)) {
+          console.log("Someone is in check!");
+          highlightCheck(boardState, opponentColor);
+        }
+        clearHighlights("exceptCheck");
         render();
       } else {
         console.log("Illegal Move: King is in check.");
         selectedPiece = null;
         legalMoves = [];
-        clearHighlights();
-        // highlightCheck();
+        highlightCheck(boardState, currentTurn);
+        clearHighlights("exceptCheck");
         render();
       }
     } else {
       legalMoves = [];
       selectedPiece = null;
-
       clearHighlights();
-      // highlightCheck();
     }
   } else {
     if (clickedPiece && clickedPieceColor == currentTurn) {
@@ -416,11 +428,11 @@ chessBoardUI.addEventListener("click", (e) => {
             boardState
           );
           break;
-
         default:
           legalMoves = [];
       }
       legalMoves = legalMoves.filter((move) => {
+        // A move isn't legal if it puts the King in check.
         const tempBoardState = JSON.parse(JSON.stringify(boardState));
         tempBoardState[move[0]][move[1]] = selectedPiece.piece;
         tempBoardState[selectedPiece.row][selectedPiece.col] = null;
@@ -430,38 +442,6 @@ chessBoardUI.addEventListener("click", (e) => {
     } else {
       clearHighlights();
     }
-    // const piece = boardState[row][col];
-    // if (piece) {
-    //   selectedPiece = { row, col, piece };
-    //   if (piece == "wP" || piece == "bP")
-    //     legalMoves = getPawnMoves(
-    //       selectedPiece.row,
-    //       selectedPiece.col,
-    //       boardState
-    //     );
-    //   if (piece == "wR" || piece == "bR")
-    //     legalMoves = getRookMoves(
-    //       selectedPiece.row,
-    //       selectedPiece.col,
-    //       boardState
-    //     );
-    //   if (piece == "wN" || piece == "bN")
-    //     legalMoves = getKnightMoves(
-    //       selectedPiece.row,
-    //       selectedPiece.col,
-    //       boardState
-    //     );
-    //   if (piece == "wB" || piece == "bB")
-    //     legalMoves = getBishopMoves(
-    //       selectedPiece.row,
-    //       selectedPiece.col,
-    //       boardState
-    //     );
-    //   if (piece == "wQ" || piece == "bQ")
-    //     legalMoves = getQueenMoves(row, col, boardState);
-    //   if (piece == "wK" || piece == "bK")
-    //     legalMoves = getKingMoves(row, col, boardState);
-    // }
   }
 });
 

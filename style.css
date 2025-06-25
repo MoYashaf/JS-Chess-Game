@@ -1,0 +1,84 @@
+body {
+  box-sizing: border-box;
+}
+
+.chess-board {
+  display: grid;
+  place-content: center;
+  grid-template-columns: repeat(8, 100px);
+  grid-template-rows: repeat(8, 100px);
+  /* .file {
+    text-align: center;
+  }
+  .rank {
+    text-align: end;
+    padding-right: 10px;
+  } */
+  .square {
+    height: 100px;
+  }
+}
+
+.light-square {
+  background-color: white;
+  border: 0.5px solid black;
+}
+.dark-square {
+  background-color: rgb(82, 211, 136);
+  border: 1.2px solid black;
+}
+
+.piece {
+  width: 100%;
+  height: 100%;
+  margin: auto;
+  cursor: pointer;
+  transition: cubic-bezier(0.075, 0.82, 0.165, 1) 0.2s;
+}
+.w-king {
+  background-image: url("assests/wK.svg");
+}
+.b-king {
+  background-image: url("assests/bK.svg");
+}
+.w-queen {
+  background-image: url("assests/wQ.svg");
+}
+.b-queen {
+  background-image: url("assests/bQ.svg");
+}
+.w-knight {
+  background-image: url("assests/wN.svg");
+}
+.b-knight {
+  background-image: url("assests/bN.svg");
+}
+.w-bishop {
+  background-image: url("assests/wB.svg");
+}
+.b-bishop {
+  background-image: url("assests/bB.svg");
+}
+.w-rook {
+  background-image: url("assests/wR.svg");
+}
+.b-rook {
+  background-image: url("assests/bR.svg");
+}
+.w-pawn {
+  background-image: url("assests/wP.svg");
+}
+.b-pawn {
+  background-image: url("assests/bP.svg");
+}
+
+.legal-move {
+  /* background-color: lightskyblue; */
+  /* background: radial-gradient(rgba(20, 85, 30, 0.5) 19%, rgba(0, 0, 0, 0) 20%); */
+  /* background-image: radial-gradient(lightskyblue 19%, rgba(0, 0, 0, 0) 20%); */
+  box-shadow: inset 1px 1px 5px 10px lightskyblue;
+  cursor: pointer;
+}
+.in-check {
+  box-shadow: inset 1px 1px 5px 10px red;
+}

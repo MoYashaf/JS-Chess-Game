@@ -1,16 +1,32 @@
 <!DOCTYPE html>
-<html lang="en">
+<html>
   <head>
-    <meta charset="UTF-8" />
-    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta http-equiv="CONTENT-TYPE" content="text/html; charset=UTF-8" />
+    <title>!Hello, World</title>
     <link rel="stylesheet" href="style.css" />
-    <title>Chess</title>
-    <script src="index.js" defer></script>
+    <script
+      defer
+      src="https://cdn.jsdelivr.net/npm/alpinejs@3.x.x/dist/cdn.min.js"
+    ></script>
+    <script type="module" src="chess.js" defer></script>
   </head>
   <body>
-    <div>
-      <h1 class="current-turn">Current Turn: White</h1>
-      <div class="chess-board"></div>
+    <div class="chess-board">
+      <svg class="svg-layer">
+        <defs>
+          <marker
+            id="arrowhead"
+            markerWidth="4"
+            markerHeight="4"
+            refX="2"
+            refY="2"
+            orient="auto"
+            markerUnits="storkeWidth"
+          >
+            <path d="M0,0 V4 L3,2 Z" fill="rgba(255, 0, 0, 0.6)" />
+          </marker>
+        </defs>
+      </svg>
     </div>
   </body>
 </html>

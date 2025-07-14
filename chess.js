@@ -87,24 +87,17 @@ function handleBoardClick(e) {
     highlightSquares(legalMoves);
     return;
   }
-  const isLegalMove = legalMoves.some(
-    (move) => move[0] == row && move[1] == col
-  );
-  if (!isLegalMove) {
+  const isLegalMove = legalMoves.some(([r, c]) => r == row && c == col);
+  if (isLegalMove && selectedPiece.piece.color == currentTurn) {
+    const wasCapture = isCapture([row, col], boardState);
+    movePiece([selectedPiece.row, selectedPiece.col], [row, col], boardState);
+    currentTurn = switchTurn(currentTurn);
+    selectedPiece.piece.hasMoved = true;
+    if (wasCapture) captureAudio.play();
+    else moveAudio.play();
+    resetHighlights();
     resetBoard();
-    return;
   }
-  if (selectedPiece.piece.color != currentTurn) {
-    resetBoard();
-    return;
-  }
-  movePiece([selectedPiece.row, selectedPiece.col], [row, col], boardState);
-  selectedPiece.piece.hasMoved = true;
-  currentTurn = switchTurn(currentTurn);
-  checkGameState(currentTurn);
-  if (isCapture([row, col], boardState)) captureAudio.play();
-  else moveAudio.play();
-  resetBoard();
 }
 
 // function selectPiece(row, col, boardState) {
@@ -142,6 +135,7 @@ function movePiece([fromR, fromC], [toR, toC], boardState, animate = true) {
       boardState[toR][toC] = boardState[fromR][fromC];
       boardState[fromR][fromC] = null;
       render(boardState);
+      checkGameState(currentTurn);
       piece.removeEventListener("transitionend", handleTransitionEnd);
       return;
     }
@@ -254,8 +248,6 @@ function handlePieceDrop(e) {
     checkGameState(currentTurn);
     if (wasCapture) captureAudio.play();
     else moveAudio.play();
-    resetBoard();
-    resetHighlights();
   }
 }
 
@@ -344,7 +336,7 @@ function hasLegalMoves(color, boardState) {
 function checkGameState(nextTurn) {
   const isInCheck = isKingInCheck(nextTurn, boardState);
   const hasMoves = hasLegalMoves(nextTurn, boardState);
-  console.log(`Is King In Check? ${isInCheck}`);
+  console.log(`Is ${nextTurn} King In Check? ${isInCheck}`);
   console.log(`Does the ${nextTurn} king have any moves? ${hasMoves}`);
   if (isInCheck && !hasMoves) {
     console.log("Checkmate");

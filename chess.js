@@ -70,10 +70,11 @@ function handleBoardClick(e) {
   const col = Number(square.dataset.col);
 
   if (!selectedPiece) {
-    if (square.children.length == 0) return;
-    if (boardState[row][col].color != currentTurn) {
+    if (
+      square.children.length == 0 ||
+      boardState[row][col].color != currentTurn
+    )
       return;
-    }
     selectedPiece = { row, col, piece: boardState[row][col] };
     legalMoves = [...selectedPiece.piece.getMoves(row, col, boardState)].filter(
       (move) =>
@@ -84,10 +85,20 @@ function handleBoardClick(e) {
           currentTurn
         )
     );
+    if (selectedPiece.piece.type == "K") {
+      getCastleMoves(currentTurn, boardState).forEach((move) => {
+        if (move.length != 0) legalMoves.push(move);
+      });
+    }
     highlightSquares(legalMoves);
     return;
   }
   const isLegalMove = legalMoves.some(([r, c]) => r == row && c == col);
+  if (!isLegalMove) {
+    resetHighlights();
+    resetBoard();
+    return;
+  }
   if (isLegalMove && selectedPiece.piece.color == currentTurn) {
     const wasCapture = isCapture([row, col], boardState);
     movePiece([selectedPiece.row, selectedPiece.col], [row, col], boardState);
@@ -111,34 +122,63 @@ function handleBoardClick(e) {
 // }
 
 function movePiece([fromR, fromC], [toR, toC], boardState, animate = true) {
-  if (!gameEnd) {
-    let piece = document.querySelector(
-      `.square[data-row="${fromR}"][data-col="${fromC}"] .piece`
+  if (gameEnd) return;
+  let isShortCastle = boardState[fromR][fromC].type == "K" && fromC - toC == -2;
+  let isLongCastle = boardState[fromR][fromC].type == "K" && fromC - toC == 2;
+  let piece = document.querySelector(
+    `.square[data-row="${fromR}"][data-col="${fromC}"] .piece`
+  );
+  if (!piece) {
+    console.log("Piece to be moved doesn't exist");
+    return;
+  }
+  if (!animate) {
+    boardState[toR][toC] = boardState[fromR][fromC];
+    boardState[fromR][fromC] = null;
+    if (isShortCastle) {
+      const rookCol = BOARD_DIM - 1;
+      boardState[fromR][rookCol - 2] = boardState[fromR][rookCol];
+      boardState[fromR][rookCol] = null;
+    }
+    if (isLongCastle) {
+      const rookCol = 0;
+      boardState[fromR][rookCol + 3] = boardState[fromR][rookCol];
+      boardState[fromR][rookCol] = null;
+    }
+    render(boardState);
+    return;
+  }
+  const translateX = (toC - fromC) * 80;
+  const translateY = (toR - fromR) * 80;
+
+  piece.style.transform = ` translate(${translateX}px, ${translateY}px)`;
+  if (isShortCastle) {
+    const rookCol = BOARD_DIM - 1;
+    let rook = document.querySelector(
+      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`
     );
-    if (!piece) {
-      console.log("Piece to be moved doesn't exist");
-      return;
-    }
-    if (!animate) {
-      boardState[toR][toC] = boardState[fromR][fromC];
-      boardState[fromR][fromC] = null;
-      render(boardState);
-      return;
-    }
-    const translateX = (toC - fromC) * 80;
-    const translateY = (toR - fromR) * 80;
+    rook.style.transform = `translate(${-2 * 80}px)`;
+    boardState[fromR][rookCol - 2] = boardState[fromR][rookCol];
+    boardState[fromR][rookCol] = null;
+  }
+  if (isLongCastle) {
+    const rookCol = 0;
+    let rook = document.querySelector(
+      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`
+    );
+    rook.style.transform = `translate(${3 * 80}px)`;
+    boardState[fromR][rookCol + 3] = boardState[fromR][rookCol];
+    boardState[fromR][rookCol] = null;
+  }
 
-    piece.style.transform = ` translate(${translateX}px, ${translateY}px)`;
-
-    piece.addEventListener("transitionend", handleTransitionEnd);
-    function handleTransitionEnd(e) {
-      boardState[toR][toC] = boardState[fromR][fromC];
-      boardState[fromR][fromC] = null;
-      render(boardState);
-      checkGameState(currentTurn);
-      piece.removeEventListener("transitionend", handleTransitionEnd);
-      return;
-    }
+  piece.addEventListener("transitionend", handleTransitionEnd);
+  function handleTransitionEnd(e) {
+    boardState[toR][toC] = boardState[fromR][fromC];
+    boardState[fromR][fromC] = null;
+    render(boardState);
+    checkGameState(currentTurn);
+    piece.removeEventListener("transitionend", handleTransitionEnd);
+    return;
   }
 }
 
@@ -210,6 +250,8 @@ function handleDragStart(e, pieceImg, row, col, piece) {
         currentTurn
       )
   );
+  if (selectedPiece.piece.type == "K")
+    legalMoves.push(...getCastleMoves(currentTurn, boardState));
   e.dataTransfer.setData(
     "text/plain",
     JSON.stringify({
@@ -377,4 +419,85 @@ function boardHasOnlyTwoKings(boardState) {
     }
   }
   if (kings.length > 1) return true;
+}
+
+function getShortCastle(color, board) {
+  const startingRow = color == "w" ? BOARD_DIM - 1 : 0;
+  const kingCol = 4;
+  let rook = false;
+  let king = false;
+  for (let i = BOARD_DIM - 1; i >= kingCol; i--) {
+    let piece = board[startingRow][i];
+    if (piece && piece.type != "K" && piece.type != "R") {
+      console.log("You can't short castle while other pieces are in the way.");
+      return [];
+    }
+    if (piece && piece.type == "K" && !piece.hasMoved) king = true;
+    if (piece && piece.type == "R" && !piece.hasMoved) rook = true;
+    if (isKingInCheck(color, board)) {
+      console.log("You can't short castle while king is in check.");
+      return [];
+    }
+    if (
+      isMoveLeavingKingInCheck(
+        [startingRow, kingCol],
+        [startingRow, kingCol + 2],
+        board,
+        color
+      )
+    ) {
+      console.log("Short Castling cannot leave you in check.");
+      return [];
+    }
+    if (rook && king) {
+      return [startingRow, kingCol + 2];
+    }
+  }
+  return [];
+}
+
+function getLongCastle(color, board) {
+  const startingRow = color == "w" ? BOARD_DIM - 1 : 0;
+  const kingCol = 4;
+  let rook = false;
+  let king = false;
+  for (let i = 0; i <= kingCol; i++) {
+    let piece = board[startingRow][i];
+    if (piece && piece.type != "K" && piece.type != "R") {
+      console.log("You can't short castle while other pieces are in the way.");
+      return [];
+    }
+    if (piece && piece.type == "K" && !piece.hasMoved) king = true;
+    if (piece && piece.type == "R" && !piece.hasMoved) rook = true;
+    if (isKingInCheck(color, board)) {
+      console.log("You can't long castle while in check.");
+      return [];
+    }
+    if (
+      isMoveLeavingKingInCheck(
+        [startingRow, kingCol],
+        [startingRow, kingCol - 2],
+        board,
+        color
+      )
+    ) {
+      console.log("You can't long castle while in check.");
+      return [];
+    }
+    if (rook && king) {
+      return [startingRow, kingCol - 2];
+    }
+  }
+  return [];
+}
+
+function getCastleMoves(color, board) {
+  console.log(
+    getShortCastle(color, board).length,
+    getLongCastle(color, board).length
+  );
+  return [
+    getShortCastle(color, board) || [],
+    getLongCastle(color, board) || [],
+  ];
 }

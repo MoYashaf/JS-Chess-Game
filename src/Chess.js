@@ -14,59 +14,59 @@ export const COLORS = {
 
 // This board state represents the entire game board.
 // an empty square is 'null', and every other piece is an object.
-export let boardState = Array.from({ length: 8 }, () =>
-  new Array(8).fill(null)
-);
-boardState[4][5] = new Bishop("b");
-boardState[4][3] = new Queen("b");
-boardState[7][4] = new King("w");
-boardState[0][4] = new King("b");
-// export let boardState = [
-//   [
-//     new Rook("b"),
-//     new Knight("b"),
-//     new Bishop("b"),
-//     new Queen("b"),
-//     new King("b"),
-//     new Bishop("b"),
-//     new Knight("b"),
-//     new Rook("b"),
-//   ],
-//   [
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//     new Pawn("b"),
-//   ],
-//   [null, null, null, null, null, null, null, null],
-//   [null, null, null, null, null, null, null, null],
-//   [null, null, null, null, null, null, null, null],
-//   [null, null, null, null, null, null, null, null],
-//   [
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//     new Pawn("w"),
-//   ],
-//   [
-//     new Rook("w"),
-//     new Knight("w"),
-//     new Bishop("w"),
-//     new Queen("w"),
-//     new King("w"),
-//     new Bishop("w"),
-//     new Knight("w"),
-//     new Rook("w"),
-//   ],
-// ];
+// export let boardState = Array.from({ length: 8 }, () =>
+//   new Array(8).fill(null)
+// );
+// boardState[4][5] = new Bishop("b");
+// boardState[4][3] = new Queen("b");
+// boardState[7][4] = new King("w");
+// boardState[0][4] = new King("b");
+export let boardState = [
+  [
+    new Rook("b"),
+    new Knight("b"),
+    new Bishop("b"),
+    new Queen("b"),
+    new King("b"),
+    new Bishop("b"),
+    new Knight("b"),
+    new Rook("b"),
+  ],
+  [
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+    new Pawn("b"),
+  ],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [null, null, null, null, null, null, null, null],
+  [
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+    new Pawn("w"),
+  ],
+  [
+    new Rook("w"),
+    new Knight("w"),
+    new Bishop("w"),
+    new Queen("w"),
+    new King("w"),
+    new Bishop("w"),
+    new Knight("w"),
+    new Rook("w"),
+  ],
+];
 // Used for assigning the correct CSS class for each piece.
 export const pieceMap = {
   K: "king",

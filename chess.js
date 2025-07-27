@@ -3,7 +3,6 @@ import { boardState, BOARD_DIM, pieceMap } from "./src/Chess.js";
 let uiBoard = document.querySelector(".chess-board");
 const moveAudio = new Audio("assets/Move.mp3");
 const captureAudio = new Audio("assets/Capture-2.mp3");
-const invalidMoveAudio = new Audio("assets/invalid-move.mp3");
 const checkAudio = new Audio("assets/move-check.mp3");
 const gameEndAudio = new Audio("assets/game-end.mp3");
 
@@ -39,7 +38,7 @@ function render(boardState) {
       pieceImg.classList.add("piece", `${piece.color}-${pieceMap[piece.type]}`);
       pieceImg.src = `assets/${piece.color}-${pieceMap[piece.type]}.svg`;
       pieceImg.addEventListener("dragstart", (e) =>
-        handleDragStart(e, pieceImg, row, col, piece)
+        handleDragStart(e, pieceImg, row, col, piece),
       );
       pieceImg.addEventListener("dragend", handleDragEnd);
       square.appendChild(pieceImg);
@@ -82,8 +81,8 @@ function handleBoardClick(e) {
           [selectedPiece.row, selectedPiece.col],
           move,
           boardState,
-          currentTurn
-        )
+          currentTurn,
+        ),
     );
     if (selectedPiece.piece.type == "K") {
       getCastleMoves(currentTurn, boardState).forEach((move) => {
@@ -126,7 +125,7 @@ function movePiece([fromR, fromC], [toR, toC], boardState, animate = true) {
   let isShortCastle = boardState[fromR][fromC].type == "K" && fromC - toC == -2;
   let isLongCastle = boardState[fromR][fromC].type == "K" && fromC - toC == 2;
   let piece = document.querySelector(
-    `.square[data-row="${fromR}"][data-col="${fromC}"] .piece`
+    `.square[data-row="${fromR}"][data-col="${fromC}"] .piece`,
   );
   if (!piece) {
     console.log("Piece to be moved doesn't exist");
@@ -155,7 +154,7 @@ function movePiece([fromR, fromC], [toR, toC], boardState, animate = true) {
   if (isShortCastle) {
     const rookCol = BOARD_DIM - 1;
     let rook = document.querySelector(
-      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`
+      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`,
     );
     rook.style.transform = `translate(${-2 * 80}px)`;
     boardState[fromR][rookCol - 2] = boardState[fromR][rookCol];
@@ -164,7 +163,7 @@ function movePiece([fromR, fromC], [toR, toC], boardState, animate = true) {
   if (isLongCastle) {
     const rookCol = 0;
     let rook = document.querySelector(
-      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`
+      `.square[data-row="${fromR}"][data-col="${rookCol}"] .piece`,
     );
     rook.style.transform = `translate(${3 * 80}px)`;
     boardState[fromR][rookCol + 3] = boardState[fromR][rookCol];
@@ -195,7 +194,7 @@ function highlightSquares(squaresCoords, isCheck = false) {
     });
   } else {
     let square = document.querySelector(
-      `.square[data-row="${squaresCoords[0]}"][data-col="${squaresCoords[1]}"]`
+      `.square[data-row="${squaresCoords[0]}"][data-col="${squaresCoords[1]}"]`,
     );
     square.classList.add("in-check");
   }
@@ -214,7 +213,7 @@ function getSquaresFromCoords(coords) {
   let squares = [];
   for (let i = 0; i < coords.length; i++) {
     const targetSquare = document.querySelector(
-      `.square[data-row="${coords[i][0]}"][data-col="${coords[i][1]}"]`
+      `.square[data-row="${coords[i][0]}"][data-col="${coords[i][1]}"]`,
     );
     squares.push(targetSquare);
   }
@@ -239,7 +238,7 @@ function handleDragStart(e, pieceImg, row, col, piece) {
     ...selectedPiece.piece.getMoves(
       selectedPiece.row,
       selectedPiece.col,
-      boardState
+      boardState,
     ),
   ].filter(
     (move) =>
@@ -247,8 +246,8 @@ function handleDragStart(e, pieceImg, row, col, piece) {
         [selectedPiece.row, selectedPiece.col],
         move,
         boardState,
-        currentTurn
-      )
+        currentTurn,
+      ),
   );
   if (selectedPiece.piece.type == "K")
     legalMoves.push(...getCastleMoves(currentTurn, boardState));
@@ -259,7 +258,7 @@ function handleDragStart(e, pieceImg, row, col, piece) {
       startCol: selectedPiece.col,
       pieceType: selectedPiece.piece.type,
       pieceColor: selectedPiece.piece.color,
-    })
+    }),
   );
   e.dataTransfer.effectAllowed = "move";
 }
@@ -272,14 +271,14 @@ function handleDragEnd(e) {
 function handlePieceDrop(e) {
   e.preventDefault();
   const { startRow, startCol } = JSON.parse(
-    e.dataTransfer.getData("text/plain")
+    e.dataTransfer.getData("text/plain"),
   );
   let wasCapture = false;
   let targetSquare = e.target.closest(".square");
   const targetRow = Number(targetSquare.dataset.row);
   const targetCol = Number(targetSquare.dataset.col);
   const isLegalMove = legalMoves.some(
-    (move) => move[0] == targetRow && move[1] == targetCol
+    (move) => move[0] == targetRow && move[1] == targetCol,
   );
   if (isLegalMove && boardState[startRow][startCol].color == currentTurn) {
     // Perform the real move
@@ -337,14 +336,14 @@ function isMoveLeavingKingInCheck(
   [fromR, fromC],
   [toR, toC],
   boardState,
-  kingColor
+  kingColor,
 ) {
   const tempBoard = boardState.map((row) =>
     row.map((piece) =>
       piece
         ? Object.assign(Object.create(Object.getPrototypeOf(piece)), piece)
-        : null
-    )
+        : null,
+    ),
   );
 
   // Perform the hypothetical move on the temporary board.
@@ -364,7 +363,7 @@ function hasLegalMoves(color, boardState) {
       const filtered = piece
         .getMoves(i, j, boardState)
         .filter(
-          (move) => !isMoveLeavingKingInCheck([i, j], move, boardState, color)
+          (move) => !isMoveLeavingKingInCheck([i, j], move, boardState, color),
         );
 
       if (filtered.length > 0) {
@@ -443,7 +442,7 @@ function getShortCastle(color, board) {
         [startingRow, kingCol],
         [startingRow, kingCol + 2],
         board,
-        color
+        color,
       )
     ) {
       console.log("Short Castling cannot leave you in check.");
@@ -478,7 +477,7 @@ function getLongCastle(color, board) {
         [startingRow, kingCol],
         [startingRow, kingCol - 2],
         board,
-        color
+        color,
       )
     ) {
       console.log("You can't long castle while in check.");
@@ -494,7 +493,7 @@ function getLongCastle(color, board) {
 function getCastleMoves(color, board) {
   console.log(
     getShortCastle(color, board).length,
-    getLongCastle(color, board).length
+    getLongCastle(color, board).length,
   );
   return [
     getShortCastle(color, board) || [],
